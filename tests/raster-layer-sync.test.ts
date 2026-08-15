@@ -826,6 +826,23 @@ describe("transient raster visibility", () => {
     assert.equal(useAppStore.getState().layers[0].visible, false);
   });
 
+  it("forgets every mark when the control is unwired", () => {
+    syncRasterLayersToStore(fakeControl([rasterInfo()]).control);
+    setTransientRasterVisibility("raster-1", true);
+
+    // The control is torn down on map reinit while the store layers survive, so
+    // restoreRasterLayers can replay them into its successor under the same
+    // ids. A mark left over from a hide in flight would outlive the control it
+    // belonged to and suppress the raster's first genuine edit.
+    unwireRasterStoreSync();
+
+    syncRasterLayersToStore(
+      fakeControl([rasterInfo({ state: rasterState({ visible: false }) })]).control,
+    );
+
+    assert.equal(useAppStore.getState().layers[0].visible, false);
+  });
+
   it("forgets the mark when the control drops the raster", () => {
     syncRasterLayersToStore(fakeControl([rasterInfo()]).control);
     setTransientRasterVisibility("raster-1", true);

@@ -524,6 +524,12 @@ export function unwireRasterStoreSync(): void {
   // The successor control has been told nothing, so no echo of this one's
   // pushes can arrive; a stale record would only mis-suppress its first sync.
   controlRenderState.clear();
+  // Same for a swipe's transient hide, and the id-based prune in
+  // syncRasterLayersToStoreWithOptions cannot catch this one: restoreRasterLayers
+  // replays the surviving store layers into the successor control under their
+  // original ids, so a mark left over from a hide in flight at reinit would
+  // suppress that raster's first genuine visibility edit.
+  transientControlVisibility.clear();
 }
 
 /**
