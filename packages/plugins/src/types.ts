@@ -2,6 +2,7 @@ import type {
   ExternalNativePaintBridge,
   ExternalNativePaintMode,
   GeoLibreLayer,
+  GeoLibreProject,
   LayerStyle,
 } from "@geolibre/core";
 import type {
@@ -363,6 +364,26 @@ export interface GeoLibreAppAPI {
    * chaining.
    */
   addTileLayer?: (name: string, url: string, options?: GeoLibreTileLayerOptions) => string;
+  /**
+   * Read the current project document (the same shape `projectFromStore`
+   * produces / `loadProject` consumes — the native project file format, with
+   * `layers`, `mapView`, `basemapStyleUrl`, `metadata` etc). This is the
+   * project-level read: a plugin gets exactly what the host itself would save,
+   * so any analysis the plugin does over it is consistent with the native
+   * project by construction. Optional for forward-compatibility, so call it
+   * with optional chaining.
+   */
+  getProject?: () => GeoLibreProject;
+  /**
+   * Replace the current project with a full project document (`getProject`'s
+   * inverse): the native `loadProject` path that applies the document to the
+   * store, re-joins layers, marks the project clean and clears history —
+   * semantically "opening the project file". Project-level write: layers added
+   * through this are first-class (Layers panel / persistence / reorder) and the
+   * plugin's picture of the project stays identical to the host's. Optional for
+   * forward-compatibility, so call it with optional chaining.
+   */
+  loadProject?: (project: GeoLibreProject) => void;
   /**
    * Add a native WMTS raster tile layer from a WMTS tile URL template and return
    * its layer id. Behaves like {@link addTileLayer} (the layer is a first-class
