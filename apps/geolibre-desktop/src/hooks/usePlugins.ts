@@ -1,7 +1,11 @@
 import {
   clearExternalNativePaintBridge,
+  projectFromStore,
   setExternalNativePaintBridge,
   useAppStore,
+} from "@geolibre/core";
+import type { GeoLibreProject } from "@geolibre/core";
+import {
 } from "@geolibre/core";
 import {
   addRasterToMap,
@@ -845,6 +849,13 @@ export function createAppAPI(mapControllerRef?: RefObject<MapController | null>)
     addTileLayer: (name: string, url: string, options?: GeoLibreTileLayerOptions) =>
       store.addTileLayer(
         name,
+    // Project-level read/write: getProject returns the exact document the host
+    // would save, loadProject applies a full document through the native
+    // "open project file" path. A plugin that reads the project and writes it
+    // back stays consistent with the native project by construction — no
+    // parallel per-layer model that can drift.
+    getProject: () => projectFromStore(useAppStore.getState()),
+    loadProject: (project: GeoLibreProject) => useAppStore.getState().loadProject(project),
         { type: "xyz", tiles: [url], url, ...tileLayerStoreOptions(options) },
         options?.beforeLayerId ?? null,
       ),
